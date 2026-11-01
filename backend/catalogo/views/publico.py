@@ -11,13 +11,60 @@ from rest_framework import status
 from django.db.models import Count
 
 from catalogo.models import Trabalho
-from catalogo.serializers.publico import TrabalhoPublicoSerializer,TrabalhoPublicoDetalheSerializer
+from catalogo.serializers.publico import TrabalhoPublicoSerializer,TrabalhoPublicoDetalheSerializer, OrientadorEstatisticaSerializer, EstatisticasSerializer
+
+from drf_spectacular.utils import (
+    extend_schema,
+    extend_schema_view,
+    OpenApiResponse,
+    OpenApiExample,
+    inline_serializer,
+)
+from drf_spectacular.types import OpenApiTypes
+from rest_framework import serializers
 
 class TrabalhoPublicoPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = "page_size"
     max_page_size = 100
 
+@extend_schema_view(
+    list=extend_schema(
+        tags=["Trabalhos públicos"],
+        summary="Listar trabalhos publicados",
+        description="""
+        Retorna uma lista paginada de trabalhos acadêmicos publicados.
+
+        **Busca (RF5):**
+        Permite pesquisar por título, resumo, nome dos autores
+        e nome do orientador utilizando o parâmetro `search`.
+
+        **Filtros (RF6):**
+        Permite filtrar os resultados por ano, curso e palavra-chave.
+        Os filtros podem ser combinados entre si e com a busca.
+
+        **Ordenação (RF7):**
+        Permite ordenar os resultados por ano ou título.
+        Utilize o sinal `-` para indicar ordem decrescente.
+
+        **Paginação (RF7):**
+        Retorna 10 registros por página por padrão.
+        O tamanho pode ser alterado pelo parâmetro `page_size`.
+        """,
+    ),
+    retrieve=extend_schema(
+        tags=["Trabalhos públicos"],
+        summary="Consultar detalhes de um trabalho",
+        description="""
+        Retorna os dados detalhados de um trabalho acadêmico
+        publicado, identificado pelo seu ID.
+
+        Somente trabalhos com situação PUBLICADO podem ser consultados.
+        Caso o trabalho não exista ou não esteja publicado,
+        será retornado HTTP 404.
+        """,
+    ),
+)
 class TrabalhoPublicoViewSet(ReadOnlyModelViewSet):
     authentication_classes = []
     permission_classes = [AllowAny]
@@ -49,6 +96,47 @@ class TrabalhoPublicoViewSet(ReadOnlyModelViewSet):
 
         return TrabalhoPublicoSerializer
 
+@extend_schema(
+    tags=["Estatísticas públicas"],
+    summary="Consultar estatísticas dos trabalhos",
+    description="""
+    Retorna estatísticas quantitativas dos trabalhos acadêmicos publicados.
+    """,
+    responses={
+        200: OpenApiResponse(
+            response=EstatisticasSerializer,
+            description="Estatísticas dos trabalhos publicados.",
+            examples=[
+                OpenApiExample(
+                    "Exemplo de resposta",
+                    value={
+                        "trabalhos_por_ano": {
+                            "2023": 15,
+                            "2024": 28,
+                            "2025": 42,
+                        },
+                        "trabalhos_por_curso": {
+                            "ADS": 35,
+                            "SI": 28,
+                            "GTI": 22,
+                        },
+                        "orientadores_com_mais_trabalhos": [
+                            {
+                                "nome": "João da Silva",
+                                "total": 12,
+                            },
+                            {
+                                "nome": "Maria Oliveira",
+                                "total": 9,
+                            },
+                        ],
+                    },
+                    response_only=True,
+                ),
+            ],
+        ),
+    },
+)
 @api_view(["GET"])
 @authentication_classes([])
 @permission_classes([AllowAny])

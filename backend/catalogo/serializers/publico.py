@@ -51,3 +51,21 @@ class TrabalhoPublicoDetalheSerializer(serializers.ModelSerializer):
             "palavras_chave",
         ]
         read_only_fields = fields
+
+class OrientadorEstatisticaSerializer(serializers.Serializer):
+    nome = serializers.CharField()
+    total = serializers.IntegerField()
+
+
+class EstatisticasSerializer(serializers.Serializer):
+    trabalhos_por_ano = serializers.DictField(
+        child=serializers.IntegerField()
+    )
+
+    trabalhos_por_curso = serializers.DictField(
+        child=serializers.IntegerField()
+    )
+
+    orientadores_com_mais_trabalhos = OrientadorEstatisticaSerializer(
+        many=True
+    )
