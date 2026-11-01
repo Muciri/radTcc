@@ -1,26 +1,23 @@
-from django.shortcuts import get_object_or_404
-
-from rest_framework.decorators import (api_view, permission_classes, authentication_classes)
-from rest_framework.response import Response
+from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.permissions import AllowAny
 
 from catalogo.models import Trabalho
-from catalogo.serializers.publico import TrabalhoPublicoSerializer, TrabalhoPublicoDetalheSerializer
+from catalogo.serializers.publico import TrabalhoPublicoSerializer,TrabalhoPublicoDetalheSerializer
 
-@api_view(['GET'])
-@authentication_classes([])
-@permission_classes([AllowAny])
-def listar_trabalhos_publicos(request, **kwargs):
-    trabalhos = Trabalho.objects.filter(situacao = Trabalho.Situacao.PUBLICADO)
-    serializer = TrabalhoPublicoSerializer(trabalhos, many=True)
+class TrabalhoPublicoViewSet(ReadOnlyModelViewSet):
+    authentication_classes = []
+    permission_classes = [AllowAny]
 
-    return Response(serializer.data)
+    lookup_field = "id"
+    lookup_url_kwarg = "id_trabalho"
 
-@api_view(['GET'])
-@authentication_classes([])
-@permission_classes([AllowAny])
-def ver_trabalho(request, id_trabalho, **kwargs):
-    trabalho = get_object_or_404(Trabalho, id=id_trabalho)
-    serializer = TrabalhoPublicoDetalheSerializer(trabalho)
+    def get_queryset(self):
+        return Trabalho.objects.filter(
+            situacao=Trabalho.Situacao.PUBLICADO
+        )
 
-    return Response(serializer.data)
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return TrabalhoPublicoDetalheSerializer
+
+        return TrabalhoPublicoSerializer
