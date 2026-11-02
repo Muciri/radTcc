@@ -1,7 +1,31 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from catalogo.models import Trabalho
+from catalogo.models import Autor, Curso, Orientador, PalavraChave, Trabalho
+
+
+class CursoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Curso
+        fields = ["id", "nome", "sigla"]
+
+
+class OrientadorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Orientador
+        fields = ["id", "nome", "titulacao", "email"]
+
+
+class AutorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Autor
+        fields = ["id", "nome", "email"]
+
+
+class PalavraChaveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PalavraChave
+        fields = ["id", "termo"]
 
 
 class TrabalhoGestaoSerializer(serializers.ModelSerializer):
