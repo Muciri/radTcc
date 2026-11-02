@@ -1,5 +1,5 @@
 from django.db.models import Count
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as filters
 from drf_spectacular.utils import (
     OpenApiExample,
     OpenApiResponse,
@@ -26,6 +26,25 @@ class TrabalhoPublicoPagination(PageNumberPagination):
     page_size_query_param = "page_size"
     max_page_size = 100
 
+
+class TrabalhoFilter(filters.FilterSet):
+    curso = filters.CharFilter(
+        field_name="curso__sigla",
+        lookup_expr="iexact",
+        help_text="Sigla do curso, por exemplo `TSI`.",
+    )
+    palavra_chave = filters.CharFilter(
+        field_name="palavras_chave__termo",
+        lookup_expr="iexact",
+        distinct=True,
+        help_text="Termo exato da palavra-chave.",
+    )
+
+    class Meta:
+        model = Trabalho
+        fields = ["ano"]
+
+
 @extend_schema_view(
     list=extend_schema(
         tags=["Trabalhos públicos"],
@@ -33,19 +52,20 @@ class TrabalhoPublicoPagination(PageNumberPagination):
         description="""
         Retorna uma lista paginada de trabalhos acadêmicos publicados.
 
-        **Busca (RF5):**
+        **Busca:**
         Permite pesquisar por título, resumo, nome dos autores
         e nome do orientador utilizando o parâmetro `search`.
 
-        **Filtros (RF6):**
-        Permite filtrar os resultados por ano, curso e palavra-chave.
-        Os filtros podem ser combinados entre si e com a busca.
+        **Filtros:**
+        Permite filtrar os resultados por `ano`, `curso` (sigla) e
+        `palavra_chave` (termo). Os filtros podem ser combinados entre si
+        e com a busca.
 
-        **Ordenação (RF7):**
-        Permite ordenar os resultados por ano ou título.
-        Utilize o sinal `-` para indicar ordem decrescente.
+        **Ordenação:**
+        Permite ordenar os resultados por ano ou título com o parâmetro
+        `ordering`. Utilize o sinal `-` para indicar ordem decrescente.
 
-        **Paginação (RF7):**
+        **Paginação:**
         Retorna 10 registros por página por padrão.
         O tamanho pode ser alterado pelo parâmetro `page_size`.
         """,
@@ -67,17 +87,14 @@ class TrabalhoPublicoViewSet(ReadOnlyModelViewSet):
     authentication_classes = []
     permission_classes = [AllowAny]
 
-    lookup_field = "id"
-    lookup_url_kwarg = "id_trabalho"
-
-    search_fields = ["titulo", "resumo", "orientador__nome", "autores__nome",]
-    filterset_fields = ["ano", "curso", "palavras_chave",]
-    ordering_fields = ["ano", "titulo",]
+    search_fields = ["titulo", "resumo", "orientador__nome", "autores__nome"]
+    filterset_class = TrabalhoFilter
+    ordering_fields = ["ano", "titulo"]
     ordering = ["-ano", "titulo"]
 
     filter_backends = [
         SearchFilter,
-        DjangoFilterBackend,
+        filters.DjangoFilterBackend,
         OrderingFilter,
     ]
 
@@ -111,23 +128,22 @@ class TrabalhoPublicoViewSet(ReadOnlyModelViewSet):
                     "Exemplo de resposta",
                     value={
                         "trabalhos_por_ano": {
-                            "2023": 15,
-                            "2024": 28,
-                            "2025": 42,
+                            "2025": 4,
+                            "2024": 5,
+                            "2023": 6,
                         },
                         "trabalhos_por_curso": {
-                            "ADS": 35,
-                            "SI": 28,
-                            "GTI": 22,
+                            "TSI": 9,
+                            "LMAT": 5,
                         },
                         "orientadores_com_mais_trabalhos": [
                             {
-                                "nome": "João da Silva",
-                                "total": 12,
+                                "nome": "Mariana Cavalcanti Rocha",
+                                "total": 4,
                             },
                             {
-                                "nome": "Maria Oliveira",
-                                "total": 9,
+                                "nome": "Renata Albuquerque Lima",
+                                "total": 3,
                             },
                         ],
                     },
