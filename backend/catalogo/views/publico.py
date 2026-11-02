@@ -1,27 +1,25 @@
-from rest_framework.viewsets import ReadOnlyModelViewSet
-from rest_framework.permissions import AllowAny
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.filters import SearchFilter, OrderingFilter
-from django_filters.rest_framework import DjangoFilterBackend
-
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.response import Response
-from rest_framework import status
-
 from django.db.models import Count
-
-from catalogo.models import Trabalho
-from catalogo.serializers.publico import TrabalhoPublicoSerializer,TrabalhoPublicoDetalheSerializer, OrientadorEstatisticaSerializer, EstatisticasSerializer
-
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiResponse,
     extend_schema,
     extend_schema_view,
-    OpenApiResponse,
-    OpenApiExample,
-    inline_serializer,
 )
-from drf_spectacular.types import OpenApiTypes
-from rest_framework import serializers
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.viewsets import ReadOnlyModelViewSet
+
+from catalogo.models import Trabalho
+from catalogo.serializers.publico import (
+    EstatisticasSerializer,
+    TrabalhoPublicoDetalheSerializer,
+    TrabalhoPublicoSerializer,
+)
+
 
 class TrabalhoPublicoPagination(PageNumberPagination):
     page_size = 10
@@ -86,8 +84,10 @@ class TrabalhoPublicoViewSet(ReadOnlyModelViewSet):
     pagination_class = TrabalhoPublicoPagination
 
     def get_queryset(self):
-        return Trabalho.objects.filter(
-            situacao=Trabalho.Situacao.PUBLICADO
+        return (
+            Trabalho.objects.filter(situacao=Trabalho.Situacao.PUBLICADO)
+            .select_related("curso", "orientador", "coorientador")
+            .prefetch_related("autores", "palavras_chave")
         )
 
     def get_serializer_class(self):

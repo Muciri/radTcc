@@ -1,7 +1,7 @@
-
 from rest_framework import serializers
 
 from catalogo.models import Trabalho
+
 
 class TrabalhoPublicoSerializer(serializers.ModelSerializer):
     curso = serializers.StringRelatedField()
@@ -24,33 +24,14 @@ class TrabalhoPublicoSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
-from rest_framework import serializers
 
-from catalogo.models import Trabalho
-
-class TrabalhoPublicoDetalheSerializer(serializers.ModelSerializer):
-    curso = serializers.StringRelatedField()
-    orientador = serializers.StringRelatedField()
-    coorientador = serializers.StringRelatedField()
-    autores = serializers.StringRelatedField(many=True)
+class TrabalhoPublicoDetalheSerializer(TrabalhoPublicoSerializer):
     palavras_chave = serializers.StringRelatedField(many=True)
 
-    class Meta:
-        model = Trabalho
-        fields = [
-            "id",
-            "titulo",
-            "resumo",
-            "ano",
-            "data_defesa",
-            "arquivo_pdf",
-            "curso",
-            "orientador",
-            "coorientador",
-            "autores",
-            "palavras_chave",
-        ]
+    class Meta(TrabalhoPublicoSerializer.Meta):
+        fields = TrabalhoPublicoSerializer.Meta.fields + ["resumo", "palavras_chave"]
         read_only_fields = fields
+
 
 class OrientadorEstatisticaSerializer(serializers.Serializer):
     nome = serializers.CharField()
@@ -58,14 +39,6 @@ class OrientadorEstatisticaSerializer(serializers.Serializer):
 
 
 class EstatisticasSerializer(serializers.Serializer):
-    trabalhos_por_ano = serializers.DictField(
-        child=serializers.IntegerField()
-    )
-
-    trabalhos_por_curso = serializers.DictField(
-        child=serializers.IntegerField()
-    )
-
-    orientadores_com_mais_trabalhos = OrientadorEstatisticaSerializer(
-        many=True
-    )
+    trabalhos_por_ano = serializers.DictField(child=serializers.IntegerField())
+    trabalhos_por_curso = serializers.DictField(child=serializers.IntegerField())
+    orientadores_com_mais_trabalhos = OrientadorEstatisticaSerializer(many=True)
