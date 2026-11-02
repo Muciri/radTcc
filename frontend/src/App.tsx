@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Home from "./views/home";
-import { TrabalhoDetalhes } from "./views/trabalhoDetalhes";
+import { TrabalhoDetalhes } from "./views/TrabalhoDetalhes";
 
 function App() {
   return (

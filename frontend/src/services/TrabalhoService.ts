@@ -26,14 +26,14 @@ export const TrabalhoService = {
         }
 
         const response = await api.get<Page>(
-            `/api/v1/publico/trabalhos/?${params.toString()}`
+            `/publico/trabalhos/?${params.toString()}`
         );
 
         return response.data;
     },
     
     getById: async(id:string): Promise<Trabalho> => {
-        const response = await api.get<Trabalho>(`/api/v1/publico/trabalhos/${id}`);
+        const response = await api.get<Trabalho>(`/publico/trabalhos/${id}`);
         return response.data;
     }
 }
