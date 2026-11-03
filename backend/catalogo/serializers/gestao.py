@@ -49,6 +49,8 @@ class TrabalhoGestaoSerializer(serializers.ModelSerializer):
             "palavras_chave",
             "cadastrado_por",
         ]
+        # lista vazia chega ao validate_autores, que devolve a mensagem da regra
+        extra_kwargs = {"autores": {"allow_empty": True}}
         validators = [
             UniqueTogetherValidator(
                 queryset=Trabalho.objects.all(),

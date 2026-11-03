@@ -33,7 +33,7 @@ export const TrabalhoService = {
     },
     
     getById: async(id:string): Promise<Trabalho> => {
-        const response = await api.get<Trabalho>(`/publico/trabalhos/${id}`);
+        const response = await api.get<Trabalho>(`/publico/trabalhos/${id}/`);
         return response.data;
     }
 }
