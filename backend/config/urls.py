@@ -7,13 +7,18 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path(
         'api/schema/',
-        SpectacularAPIView.as_view(permission_classes=[AllowAny], authentication_classes=[]),
+        SpectacularAPIView.as_view(
+            permission_classes=[AllowAny], authentication_classes=[], throttle_classes=[]
+        ),
         name='schema',
     ),
     path(
         'api/docs/',
         SpectacularSwaggerView.as_view(
-            url_name='schema', permission_classes=[AllowAny], authentication_classes=[]
+            url_name='schema',
+            permission_classes=[AllowAny],
+            authentication_classes=[],
+            throttle_classes=[],
         ),
         name='docs',
     ),
