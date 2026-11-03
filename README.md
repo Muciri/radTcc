@@ -174,7 +174,7 @@ Para isso existem serializers separados, `TrabalhoPublicoSerializer` e `Trabalho
 {"detail": "Limite de requisições excedido. Tente novamente em 60 segundos."}
 ```
 
-Para ver acontecendo (a 31ª chamada responde 429):
+Para ver acontecendo, numa janela de um minuto sem outras chamadas públicas antes (a 31ª chamada responde 429):
 
 ```bash
 for i in $(seq 1 31); do
