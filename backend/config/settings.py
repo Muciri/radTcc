@@ -149,6 +149,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
     'DEFAULT_VERSION': 'v1',
+    'EXCEPTION_HANDLER': 'catalogo.excecoes.tratar_excecao',
     'ALLOWED_VERSIONS': ['v1'],
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
